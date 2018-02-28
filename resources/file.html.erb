@@ -1,0 +1,23 @@
+<%= render("header", binding) %>
+
+<div class="banner">
+  <div class="container">
+    <div class="breadcrumb">
+      <%= options.title %>
+    </div>
+
+    <div class="version">
+      <span class="light">Version:</span>
+      <select>
+        <option><%= options.version %> &#x25BE;</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="container main">
+  <%= file.description %>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>
+      <% if defined?(object) && object %>
+        <%= object.name %> - <%= options.title %>
+      <% else %>
+        <%= options.title %>
+      <% end %>
+    </title>
+
+    <% if defined?(assets_prefix) && assets_prefix %>
+      <script>var path_prefix = "<%= assets_prefix %>";</script>
+    <% else %>
+      <script>var path_prefix = "";</script>
+    <% end %>
+
+    <script src="<%= assets_prefix %>js/search_index.js"></script>
+    <script src="<%= assets_prefix %>js/searcher.js"></script>
+    <script src="<%= assets_prefix %>assets/main.js"></script>
+
+    <link rel="stylesheet" href="<%= assets_prefix %>assets/style.css">
+
+    <% if defined?(object) && object %>
+      <meta property="og:title" value="<%= object.full_name %>">
+
+      <% unless (description = seo_desc(object.description)).empty? %>
+        <meta name="description" content="<%= description %>">
+        <meta property="og:description" content="<%= description %>">
+      <% end %>
+
+      <meta name="keywords" content="<%= object.full_name %> class">
+
+      <% unless object.method_list.empty? %>
+        <meta name="keywords" content="<%= object.method_list.map(&:name).join(", ") %>">
+      <% end %>
+    <% end %>
+  </head>
+
+  <body>
+    <div class="header">
+      <div class="container">
+        <div class="logo">
+          <a href="<%= assets_prefix %>index.html">
+            <img src="<%= assets_prefix %>assets/rails-logo.svg">
+          </a>
+        </div>
+
+        <div class="search">
+          <input type="text" value="" id="search_field" placeholder="Search for a Class, #method, ...">
+          <img src="<%= assets_prefix %>assets/search.svg">
+
+          <div class="search-results"></div>
+        </div>
+
+        <div class="links">
+          <a href="http://guides.rubyonrails.org">Guides</a>
+          <a href="http://rubyonrails.org/maintenance/">Maintenance policy</a>
+        </div>
+      </div>
+    </div>

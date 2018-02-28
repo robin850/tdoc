@@ -1,0 +1,151 @@
+<%= render("header", binding) %>
+
+<div class="banner">
+  <div class="container">
+    <div class="breadcrumb">
+      <%= breadcrumb(object) %>
+    </div>
+
+    <div class="version">
+      <span class="light">Version:</span>
+      <select>
+        <option><%= options.version %> &#x25BE;</option>
+      </select>
+    </div>
+  </div>
+</div>
+
+<div class="nav">
+  <div class="container">
+    <h2>
+      <code><%= object.module? ? "module" : "class" %></code>
+
+      <%= object.name %>
+
+      <% unless object.module? %>
+        <% if object.superclass.kind_of?(String) %>
+          <% if object.superclass != "Object" %>
+            &lt; <%= object.superclass %>
+          <% end %>
+        <% elsif object.superclass.full_name != "Object" %>
+          <%= link_to("&lt; #{object.superclass.full_name}", object.aref_to(object.superclass.path)) %>
+        <% end %>
+      <% end %>
+    </h2>
+  </div>
+</div>
+
+<div class="container main">
+  <%= object.description %>
+
+  <% unless object.classes_and_modules.empty? %>
+    <h2>Namespace</h2>
+    <ul>
+      <% (object.modules.sort + object.classes.sort).each do |const| %>
+        <li>
+          <code class="type"><%= const.type %></code>
+          <a href="<%= object.aref_to const.path %>"><%= const.full_name %></a>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% unless object.method_list.empty? %>
+    <h2>Methods summary</h2>
+
+    <dl class="methods">
+      <% method_groups(object.method_list).each do |letter, group| %>
+        <dt><%= letter %></dt>
+        <dd><%= group.join(", &nbsp; ") %></dd>
+      <% end %>
+    </dl>
+  <% end %>
+
+  <% unless object.includes.empty? %>
+    <h2>Included Modules</h2>
+
+    <ul>
+      <% object.includes.each do |inc| %>
+        <li>
+          <% unless String === inc.module %>
+            <a href="<%= object.aref_to inc.module.path %>">
+              <%= inc.module.full_name %>
+            </a>
+          <% else %>
+            <%= inc.name %>
+          <% end %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <% object.methods_by_type.each do |type, visibilities| %>
+    <% next if visibilities[:public].empty? %>
+
+    <h2><%= type.capitalize %> public methods</h2>
+
+    <% visibilities[:public].each do |method| %>
+      <div class="method-def" id="<%= method.aref %>">
+        <a href="#<%= method.aref %>">#</a>
+
+        <% if method.call_seq %>
+          <%= method.call_seq %>
+        <% else %>
+          <%= method.name %><%= method.params %>
+        <% end %>
+      </div>
+
+      <div class="method-description">
+        <% if method.deprecated? %>
+          <p class="deprecation">
+            <strong>Deprecation warning</strong>: <%= method.deprecation_message %>
+          </p>
+        <% end %>
+
+        <% if method.private_api? %>
+          <p class="private_api">
+            <strong>Warning</strong> : This method is part of Rails internal API which
+            means that it may be broken or not available in the next Rails version.
+          </p>
+        <% end %>
+
+        <% if method.plugin_api? %>
+          <p class="plugin_api">
+            <strong>Notice</strong> : This method is meant to be used inside plugins.
+          </p>
+        <% end %>
+
+        <p><%= method.description %></p>
+
+        <% unless method.aliases.empty? %>
+          <p class="aliases">
+            Also aliased as: <%= method.aliases.map do |aka|
+              %(<a href="#{object.aref_to aka.path}">#{aka.name}</a>)
+            end.join ", " %>
+          </p>
+        <% end %>
+
+        <% if method.is_alias_for %>
+          <p class="aliases">
+            Alias for: <a href="<%= object.aref_to method.is_alias_for.path %>"><%= method.is_alias_for.name %></a>
+          </p>
+        <% end %>
+
+        <p>
+          <a href="#" data-method="<%= method.aref %>">Show source</a>
+          <% if options.github && linkable?(method) %>
+            &middot;
+            <%= github_link(method) %>
+          <% end %>
+        </p>
+
+        <div class="source" id="source-<%= method.aref %>">
+          <pre><%= method.markup_code %></pre>
+        </div>
+      </div>
+    <% end %>
+  <% end %>
+</div>
+
+</body>
+</html>
